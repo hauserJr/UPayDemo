@@ -209,17 +209,60 @@
         .tx-link-btn:hover {
             background-color: rgba(16, 185, 129, 0.2);
         }
+
+        /* QR Code Styles */
+        #qrcode {
+            padding: 10px;
+            background: white;
+            border-radius: 0.5rem;
+        }
+
+        #qrcode img {
+            margin: 0 auto;
+        }
+
+        /* Copy Button Styles */
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .copy-btn:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Demo Hint Styles */
+        .demo-hint {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
     <div class="container">
         <div class="card">
-            <div class="product-image">🚀</div>
+            <div class="product-image" id="productImage">🚀</div>
             <h1>Space Travel Ticket</h1>
             <p style="color: var(--text-muted); margin-bottom: 1rem;">One-way ticket to Mars.
                 Non-refundable.</p>
-            <div class="price">10.00 USDT</div>
+            <div class="price">10.00 BEP20.USDT</div>
 
             <button id="buyBtn" class="btn" onclick="createOrder()">
                 Pay with Crypto
@@ -232,8 +275,17 @@
                 </div>
                 <div class="status-item">
                     <span class="status-label">To:</span>
-                    <span id="toAddressDisplay" class="status-value"
-                        style="word-break: break-all; text-align: right; max-width: 70%;">...</span>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; max-width: 70%;">
+                        <span id="toAddressDisplay" class="status-value"
+                            style="word-break: break-all; text-align: right;">...</span>
+                        <button class="copy-btn" onclick="copyAddress()" title="Copy Address">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Status:</span>
@@ -249,6 +301,12 @@
                     <div class="loader"></div>
                     <p class="waiting-text">
                         Waiting for payment...
+                    </p>
+                    <p class="demo-hint">
+                        Demo Mode: System simulating payment...
+                    </p>
+                    <p class="demo-hint">
+                        系統正在模擬買家付款...
                     </p>
                 </div>
             </div>
@@ -301,6 +359,23 @@
                 statusBox.style.display = 'block';
                 orderNumDisplay.innerText = orderNum;
                 toAddressDisplay.innerText = data.data.address;
+
+                // Generate QR Code
+                const productImage = document.getElementById('productImage');
+                productImage.innerHTML = ''; // Clear rocket
+                const qrContainer = document.createElement('div');
+                qrContainer.id = 'qrcode';
+                productImage.appendChild(qrContainer);
+
+                new QRCode(qrContainer, {
+                    text: data.data.address,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
                 btn.innerText = 'Order Created';
 
                 // 2. Start SSE Listening
@@ -363,6 +438,25 @@
                 console.error('SSE Error:', err);
                 // eventSource.close(); // Don't close immediately on error, browser might retry
             };
+        }
+
+        function copyAddress() {
+            const addressText = document.getElementById('toAddressDisplay').innerText;
+            if (!addressText || addressText === '...') return;
+
+            navigator.clipboard.writeText(addressText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalHTML = btn.innerHTML;
+
+                // Visual feedback
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--success').trim()}"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
         }
     </script>
 </body>
