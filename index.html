@@ -167,6 +167,48 @@
         .hidden {
             display: none;
         }
+
+        /* New Styles for UI Improvements */
+        .waiting-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-top: 1rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .tx-link-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            text-align: center;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            margin-top: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .tx-link-btn:hover {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
     </style>
 </head>
 
@@ -197,13 +239,15 @@
                     <span class="status-label">Status:</span>
                     <span id="statusBadge" class="badge pending">Pending</span>
                 </div>
-                <div id="txRow" class="status-item hidden">
-                    <span class="status-label">TxHash:</span>
-                    <span id="txHashDisplay" class="status-value" style="font-size: 0.7rem;">...</span>
+
+                <!-- TxHash Button Container -->
+                <div id="txRow" class="hidden" style="margin-top: 1rem;">
+                    <div id="txHashDisplay"></div>
                 </div>
+
                 <div id="loadingRow" style="text-align: center; margin-top: 1rem;">
                     <div class="loader"></div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    <p class="waiting-text">
                         Waiting for payment...
                     </p>
                 </div>
@@ -213,7 +257,7 @@
 
     <script>
         // API Base URL - Change this if your API is on a different port/host
-        const API_BASE = 'https://pokerhub.duckdns.org/api';
+        const API_BASE = 'https://localhost:7201/api';
 
         let eventSource = null;
 
@@ -292,9 +336,9 @@
                     loadingRow.classList.add('hidden');
 
                     txRow.classList.remove('hidden');
-                    // Restore the link for TxHash
+                    // Restore the link for TxHash with new button style
                     txHashDisplay.innerHTML = data.txHash ?
-                        `<a href="https://testnet.bscscan.com/tx/${data.txHash}" target="_blank" style="color: var(--success); text-decoration: underline;">${data.txHash.substring(0, 10)}...${data.txHash.substring(data.txHash.length - 8)}</a>` :
+                        `<a href="https://testnet.bscscan.com/tx/${data.txHash}" target="_blank" class="tx-link-btn">View Transaction on BscScan ↗</a>` :
                         'N/A';
 
                     btn.innerText = 'Payment Successful!';
