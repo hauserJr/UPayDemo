@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPay Crypto Shop Demo</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            display: none;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .status-label {
+            color: var(--text-muted);
+        }
+
+        .status-value {
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge.pending {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge.success {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge.error {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .loader {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="product-image">🚀</div>
+            <h1>Space Travel Ticket</h1>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">One-way ticket to Mars.
+                Non-refundable.</p>
+            <div class="price">10.00 USDT</div>
+
+            <button id="buyBtn" class="btn" onclick="createOrder()">
+                Pay with Crypto
+            </button>
+
+            <div id="statusBox" class="status-box">
+                <div class="status-item">
+                    <span class="status-label">Order Num:</span>
+                    <span id="orderNumDisplay" class="status-value">...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">To:</span>
+                    <span id="toAddressDisplay" class="status-value"
+                        style="word-break: break-all; text-align: right; max-width: 70%;">...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Status:</span>
+                    <span id="statusBadge" class="badge pending">Pending</span>
+                </div>
+                <div id="txRow" class="status-item hidden">
+                    <span class="status-label">TxHash:</span>
+                    <span id="txHashDisplay" class="status-value" style="font-size: 0.7rem;">...</span>
+                </div>
+                <div id="loadingRow" style="text-align: center; margin-top: 1rem;">
+                    <div class="loader"></div>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        Waiting for payment...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL - Change this if your API is on a different port/host
+        const API_BASE = 'https://pokerhub.duckdns.org/api';
+
+        let eventSource = null;
+
+        async function createOrder() {
+            const btn = document.getElementById('buyBtn');
+            const statusBox = document.getElementById('statusBox');
+            const orderNumDisplay = document.getElementById('orderNumDisplay');
+            const toAddressDisplay = document.getElementById('toAddressDisplay');
+            const statusBadge = document.getElementById('statusBadge');
+            const loadingRow = document.getElementById('loadingRow');
+            const txRow = document.getElementById('txRow');
+
+            // Reset UI
+            btn.disabled = true;
+            btn.innerText = 'Processing...';
+            statusBox.style.display = 'none';
+            txRow.classList.add('hidden');
+            loadingRow.classList.remove('hidden');
+            statusBadge.className = 'badge pending';
+            statusBadge.innerText = 'Pending';
+
+            try {
+                // 1. Create Order
+                const response = await fetch(`${API_BASE}/demo/create?amount=10`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create order');
+                }
+
+                const data = await response.json();
+
+                if (data.statusCode !== 200) {
+                    throw new Error(data.message || 'Unknown error');
+                }
+
+                const orderNum = data.data.orderNum;
+
+                // Update UI
+                statusBox.style.display = 'block';
+                orderNumDisplay.innerText = orderNum;
+                toAddressDisplay.innerText = data.data.address;
+                btn.innerText = 'Order Created';
+
+                // 2. Start SSE Listening
+                startListening(orderNum);
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = 'Pay with Crypto';
+            }
+        }
+
+        function startListening(orderNum) {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource(`${API_BASE}/demo/order-processing?orderNum=${orderNum}`);
+
+            eventSource.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                console.log('SSE Update:', data);
+
+                const statusBadge = document.getElementById('statusBadge');
+                const loadingRow = document.getElementById('loadingRow');
+                const txRow = document.getElementById('txRow');
+                const txHashDisplay = document.getElementById('txHashDisplay');
+                const btn = document.getElementById('buyBtn');
+
+                if (data.status === 'Success') {
+                    statusBadge.className = 'badge success';
+                    statusBadge.innerText = 'PAID';
+                    loadingRow.classList.add('hidden');
+
+                    txRow.classList.remove('hidden');
+                    // Restore the link for TxHash
+                    txHashDisplay.innerHTML = data.txHash ?
+                        `<a href="https://testnet.bscscan.com/tx/${data.txHash}" target="_blank" style="color: var(--success); text-decoration: underline;">${data.txHash.substring(0, 10)}...${data.txHash.substring(data.txHash.length - 8)}</a>` :
+                        'N/A';
+
+                    btn.innerText = 'Payment Successful!';
+                    btn.style.backgroundColor = 'var(--success)';
+
+                    eventSource.close();
+                }
+                else if (data.status === 'Expired' || data.status === 'Error') {
+                    statusBadge.className = 'badge error';
+                    statusBadge.innerText = data.status.toUpperCase();
+                    loadingRow.classList.add('hidden');
+
+                    btn.innerText = 'Payment Failed';
+                    btn.style.backgroundColor = 'var(--error)';
+                    btn.disabled = false; // Allow retry?
+
+                    eventSource.close();
+                }
+            };
+
+            eventSource.onerror = function (err) {
+                console.error('SSE Error:', err);
+                // eventSource.close(); // Don't close immediately on error, browser might retry
+            };
+        }
+    </script>
+</body>
+
+</html>
