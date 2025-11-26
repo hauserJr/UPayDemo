@@ -274,6 +274,10 @@
                     <span id="orderNumDisplay" class="status-value">...</span>
                 </div>
                 <div class="status-item">
+                    <span class="status-label">Merchant Order Num:</span>
+                    <span id="merchantOrderNumDisplay" class="status-value">...</span>
+                </div>
+                <div class="status-item">
                     <span class="status-label">To:</span>
                     <div style="display: flex; align-items: center; justify-content: flex-end; max-width: 70%;">
                         <span id="toAddressDisplay" class="status-value"
@@ -323,6 +327,7 @@
             const btn = document.getElementById('buyBtn');
             const statusBox = document.getElementById('statusBox');
             const orderNumDisplay = document.getElementById('orderNumDisplay');
+            const merchantOrderNumDisplay = document.getElementById('merchantOrderNumDisplay');
             const toAddressDisplay = document.getElementById('toAddressDisplay');
             const statusBadge = document.getElementById('statusBadge');
             const loadingRow = document.getElementById('loadingRow');
@@ -354,10 +359,11 @@
                 }
 
                 const orderNum = data.data.orderNum;
-
+                const merchantOrderNum = data.data.merchantOrderNum;
                 // Update UI
                 statusBox.style.display = 'block';
                 orderNumDisplay.innerText = orderNum;
+                merchantOrderNumDisplay.innerText = merchantOrderNum;
                 toAddressDisplay.innerText = data.data.address;
 
                 // Generate QR Code
