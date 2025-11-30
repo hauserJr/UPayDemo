@@ -262,7 +262,7 @@
             <h1>Space Travel Ticket</h1>
             <p style="color: var(--text-muted); margin-bottom: 1rem;">One-way ticket to Mars.
                 Non-refundable.</p>
-            <div class="price">10.00 BEP20.USDT</div>
+            <div class="price">11.00 BEP20.USDT</div>
 
             <button id="buyBtn" class="btn" onclick="createOrder()">
                 Pay with Crypto
@@ -272,10 +272,6 @@
                 <div class="status-item">
                     <span class="status-label">Order Num:</span>
                     <span id="orderNumDisplay" class="status-value">...</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Merchant Order Num:</span>
-                    <span id="merchantOrderNumDisplay" class="status-value">...</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">To:</span>
@@ -319,7 +315,7 @@
 
     <script>
         // API Base URL - Change this if your API is on a different port/host
-        const API_BASE = 'https://pokerhub.duckdns.org/api';
+        const API_BASE = 'https://api.u-pay.cloud/api';
 
         let eventSource = null;
 
@@ -327,7 +323,6 @@
             const btn = document.getElementById('buyBtn');
             const statusBox = document.getElementById('statusBox');
             const orderNumDisplay = document.getElementById('orderNumDisplay');
-            const merchantOrderNumDisplay = document.getElementById('merchantOrderNumDisplay');
             const toAddressDisplay = document.getElementById('toAddressDisplay');
             const statusBadge = document.getElementById('statusBadge');
             const loadingRow = document.getElementById('loadingRow');
@@ -344,7 +339,7 @@
 
             try {
                 // 1. Create Order
-                const response = await fetch(`${API_BASE}/demo/create?amount=10`, {
+                const response = await fetch(`${API_BASE}/demo/create?amount=11`, {
                     method: 'POST'
                 });
 
@@ -359,11 +354,10 @@
                 }
 
                 const orderNum = data.data.orderNum;
-                const merchantOrderNum = data.data.merchantOrderNum;
+
                 // Update UI
                 statusBox.style.display = 'block';
                 orderNumDisplay.innerText = orderNum;
-                merchantOrderNumDisplay.innerText = merchantOrderNum;
                 toAddressDisplay.innerText = data.data.address;
 
                 // Generate QR Code
